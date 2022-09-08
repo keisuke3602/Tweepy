@@ -1,0 +1,75 @@
+from requests_oauthlib import OAuth1Session
+import json
+
+CONSUMER_KEY = ''
+CONSUMER_SECRET = ''
+ACCESS_TOKEN = ''
+ACCESS_TOKEN_SECRET = ''
+
+twitter_api = OAuth1Session(CONSUMER_KEY, CONSUMER_SECRET, ACCESS_TOKEN, ACCESS_TOKEN_SECRET)
+
+
+import tweepy
+auth = tweepy.OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET)
+auth.set_access_token(ACCESS_TOKEN, ACCESS_TOKEN_SECRET)
+api = tweepy.API(auth,wait_on_rate_limit = True, timeout= 5000000)
+
+
+#Search keyword
+
+from numpy import result_type
+import pandas as pd
+from datetime import datetime,timezone
+import pytz
+
+def search_term():
+  search_term = input("Input Search Term: ")
+  item_num = 100000
+
+  tweets = tweepy.Cursor(api.search,
+                         q=search_term,
+                         lang='en').items(item_num)
+
+  tweet_data = []
+  for tweet in tweets:
+    tweet_data.append([
+                       tweet.id,
+                       tweet.created_at,
+                       tweet.text,
+                       tweet.favorite_count,
+                       tweet.retweet_count,
+                       tweet.user.name,
+                       tweet.user.screen_name
+
+    ])
+  
+  labels = [
+            "Tweet_Id",
+            "Tweeted_at",
+            "Tweet_text",
+            "Favorite",
+            "Retweet",
+            "Display_name",
+            "Username"
+  ]
+
+  pd.set_option("display.max_rows", 20) 
+
+  global result
+  result = pd.DataFrame(tweet_data, columns=labels)
+                         
+  print(result)
+
+search_term()
+
+
+#download as a csv file
+from google.colab import files
+
+def download_file():
+  file_name = input("Input the file name")
+  AddCSV = result.to_csv(file_name + ".csv")
+  files.download(file_name + ".csv")
+  print(file_name + " is created.")
+  
+download_file()
