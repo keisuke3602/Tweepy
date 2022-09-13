@@ -1,0 +1,31 @@
+const CONSUMER_KEY = "your key"
+const CONSUMER_KEY_SECRET = "your key"
+
+const client = TwitterClient2.getInstance(CONSUMER_KEY,CONSUMER_KEY_SECRET)
+
+function main() {
+  const sheet = SpreadsheetApp.openById('your id').getSheetByName('your sheet's name');
+  const lastRow = sheet.getLastRow();
+  const row = Math.ceil(Math.random() * (lastRow -1)) +1;
+
+  const content = sheet.getRange(row, 1).getValue();
+  const url = sheet.getRange(row, 2).getValue();
+  const tweet = content + '\n\n' + url;
+  client.postTweet(tweet);
+}
+
+function authorize() {
+  client.authorize();
+}
+
+function reset () {
+  client.reset();
+}
+
+function getCallbackUrl() {
+  client.getCallbackUrl();
+}
+
+function authCallback(request) {
+  return client.authCallback(request);
+}
