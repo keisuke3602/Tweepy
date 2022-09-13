@@ -1,5 +1,6 @@
 # Readme file for Twitter/bot
 
+This twitter bot is only for text and url tweet.
 It uses two libraries. So, on the `Library` on GAS, please add those two libraries.
 
 1: TwitterClient2
