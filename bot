@@ -1,3 +1,5 @@
+// Please read Readme file for libraries.
+
 const CONSUMER_KEY = "your key"
 const CONSUMER_KEY_SECRET = "your key"
 
