@@ -3,31 +3,35 @@
 const CONSUMER_KEY = "your key"
 const CONSUMER_KEY_SECRET = "your key"
 
-const client = TwitterClient2.getInstance(CONSUMER_KEY,CONSUMER_KEY_SECRET)
+const twitter = TwitterWebService.getInstance(CONSUMER_KEY,CONSUMER_SECRET)
 
 function main() {
-  const sheet = SpreadsheetApp.openById('your id').getSheetByName('your sheet's name');
+  const sheet = SpreadsheetApp.openById(' sheet id').getSheetByName(' sheet name');
   const lastRow = sheet.getLastRow();
   const row = Math.ceil(Math.random() * (lastRow -1)) +1;
 
   const content = sheet.getRange(row, 1).getValue();
-  const url = sheet.getRange(row, 2).getValue();
+  const url = sheet.getRange(row, 2).getValue();https://github.com/keisuke3602/Twitter/blob/main/bot
   const tweet = content + '\n\n' + url;
-  client.postTweet(tweet);
+  const service = twitter.getService();
+  var response = service.fetch('https://api.twitter.com/1.1/statuses/update.json', {
+    method: 'post',
+    payload: { status: tweet }
+  });
 }
 
 function authorize() {
-  client.authorize();
+  twitter.authorize();
 }
 
 function reset () {
-  client.reset();
+  twitter.reset();
 }
 
 function getCallbackUrl() {
-  client.getCallbackUrl();
+  twitter.getCallbackUrl();
 }
 
 function authCallback(request) {
-  return client.authCallback(request);
+  return twitter.authCallback(request);
 }
