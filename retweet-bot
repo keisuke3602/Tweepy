@@ -1,0 +1,87 @@
+const sheet2 = SpreadsheetApp.openById('your key').getSheetByName('your sheet name');
+
+function main2(){
+  var searchWords = pickUpSearchWords();
+
+  for (var i = 0, il = searchWords.length; i < il; i++ ){
+    var searchWord = searchWords[i][0];
+    var type = searchWords[i][1];
+    var lastTweetId = searchWords[i][2];
+
+    var tweetList = findTweets(searchWord, lastTweetId);
+
+    for (var j = 0, jl = tweetList.length; j < jl; j++){
+      var tweet = tweetList[j];
+      if (tweet.id_str > lastTweetId){
+        lastTweetId = tweet.id_str;
+      }
+      
+      var status = getTweetStatus(tweet);
+      if (type == "Like"){
+        if (!status.favorited){
+          putFavorite (tweet);
+        }
+      } else if (type == "RT"){
+        if (!status.retweeted){
+          putRetweet (tweet);
+        }
+      }
+    }
+
+    var titleRow = 1;
+    var lastTweetIdCol = 3;
+    var updateCell = sheet2.getRange(i + 1 + titleRow, lastTweetIdCol, 1, 1);
+    updateCell.setValue(lastTweetId);
+  }
+}
+
+function pickUpSearchWords(){
+  var titleRow = 1;
+  var startRow = 1 + titleRow;
+  var startCol = 1;
+  var endRow = sheet2.getLastRow() - titleRow;
+  var endCol = 3;
+
+  var cells = sheet2.getRange(startRow, startCol, endRow, endCol).getValues();
+  return cells;
+}
+
+function findTweets(searchWords, lastTweetId){
+  var service = twitter.getService();
+  var query = {
+    q: searchWords,
+    result_type: 'recent',
+    since_id: 'lastTweetId'
+  }
+  var queryStr = '';
+  for (var key in query){
+    queryStr += key + '=' + encodeURIComponent(query[key]) + '&'
+  }
+  
+  var queryStr = queryStr.slice(0, -1);
+  var response = service.fetch('https://api.twitter.com/1.1/search/tweets.json?' + queryStr);
+  var result = JSON.parse(response)
+  return result.statuses
+}
+
+function getTweetStatus(tweet){
+  var service = twitter.getService();
+  var response = service.fetch('https://api.twitter.com/1.1/statuses/lookup.json?id=' + tweet.id_str);
+  var result = JSON.parse(response)
+  return result[0];
+}
+
+function putFavorite(tweet){
+  var service = twitter.getService();
+  var response = service.fetch('https://api.twitter.com/1.1/favorites/create.json',{
+    method: 'post',
+    payload: {id: tweet.id_str}
+  });
+}
+
+function putRetweet(tweet){
+  var service = twitter.getService();
+  var response = service.fetch('https://api.twitter.com/1.1/statuses/retweet/' + tweet.id_str +'.json',{
+    method: 'post'
+  });
+}
